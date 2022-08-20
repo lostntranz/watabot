@@ -11,6 +11,10 @@ import (
 	"strconv"
 )
 
+const (
+	TODAY_TIDE = "https://www.deltaboating.com/tides/sac.php"
+)
+
 type Update struct {
 	UpdateId int     `json:"update_id"`
 	Message  Message `json:"message"`
@@ -30,9 +34,17 @@ func HandleTelegramWebhook(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-
 	log.Printf("echoing incoming message: %v", incoming.Message.Text)
-	sendRespTelegram(incoming.Message.Chat.Id, "嘥撚氣,，算吧啦!")
+
+	switch incoming.Message.Text {
+	case "/tide":
+		sendRespTelegram(incoming.Message.Chat.Id, TODAY_TIDE)
+	case "/weather":
+		sendRespTelegram(incoming.Message.Chat.Id, "I'm not a weather man!")
+	default:
+		sendRespTelegram(incoming.Message.Chat.Id, "嘥撚氣,，算吧啦!")
+	}
+
 }
 
 func parseTelegramRequest(r *http.Request) (*Update, error) {
