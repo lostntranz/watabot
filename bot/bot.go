@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -30,24 +31,29 @@ type Chat struct {
 }
 
 func HandleTelegramWebhook(w http.ResponseWriter, r *http.Request) {
-	incoming, err := parseTelegramRequest(r)
+	incoming, err := parseChatMessages(r)
 	if err != nil {
 		return
 	}
 	log.Printf("echoing incoming message: %v", incoming.Message.Text)
 
-	switch incoming.Message.Text {
-	case "/tide":
-		sendRespTelegram(incoming.Message.Chat.Id, TODAY_TIDE)
-	case "/weather":
-		sendRespTelegram(incoming.Message.Chat.Id, "I'm not a weather man!")
+	switch true {
+	case strings.Contains(incoming.Message.Text, "/tide "):
+		incoming.Respond(TODAY_TIDE)
+	case strings.Contains(incoming.Message.Text, "/weather "):
+		incoming.Respond("Weather is no longer a ice-breaking topic, try harder")
+	case strings.Contains(incoming.Message.Text, "/search "):
+		results, err := incoming.Search()
+		if err != nil {
+			incoming.Respond("Some Ting Wong")
+		}
+		incoming.Respond(results)
 	default:
-		sendRespTelegram(incoming.Message.Chat.Id, "嘥撚氣,，算吧啦!")
+		incoming.Respond("嘥撚氣,，算吧啦!")
 	}
-
 }
 
-func parseTelegramRequest(r *http.Request) (*Update, error) {
+func parseChatMessages(r *http.Request) (*Update, error) {
 	var u Update
 	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
 		log.Printf("couldn't decode incoming message")
@@ -56,13 +62,13 @@ func parseTelegramRequest(r *http.Request) (*Update, error) {
 	return &u, nil
 }
 
-func sendRespTelegram(id int, response string) (string, error) {
+func (u *Update) Respond(response string) (string, error) {
 
 	var apiUrl = fmt.Sprintf("https://api.telegram.org/bot" + os.Getenv("TELEGRAM_BOT_TOKEN") + "/sendMessage")
 	resp, err := http.PostForm(
 		apiUrl,
 		url.Values{
-			"chat_id": {strconv.Itoa(id)},
+			"chat_id": {strconv.Itoa(u.Message.Chat.Id)},
 			"text":    {response},
 		},
 	)
