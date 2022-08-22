@@ -38,11 +38,17 @@ func HandleTelegramWebhook(w http.ResponseWriter, r *http.Request) {
 	log.Printf("echoing incoming message: %v", incoming.Message.Text)
 
 	switch true {
-	case strings.Contains(incoming.Message.Text, "/tide "):
+	case strings.Contains(incoming.Message.Text, "/tide"):
 		incoming.Respond(TODAY_TIDE)
-	case strings.Contains(incoming.Message.Text, "/weather "):
+	case strings.Contains(incoming.Message.Text, "/weather"):
 		incoming.Respond("Weather is no longer a ice-breaking topic, try harder")
-	case strings.Contains(incoming.Message.Text, "/search "):
+	case strings.Contains(incoming.Message.Text, "/joke"):
+		results, err := incoming.GetJoke()
+		if err != nil {
+			incoming.Respond("Ain't no joke, something is wrong here")
+		}
+		incoming.Respond(results)
+	case strings.Contains(incoming.Message.Text, "/search"):
 		results, err := incoming.Search()
 		if err != nil {
 			incoming.Respond("Some Ting Wong")
