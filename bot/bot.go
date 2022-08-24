@@ -40,8 +40,6 @@ func HandleTelegramWebhook(w http.ResponseWriter, r *http.Request) {
 	switch true {
 	case strings.Contains(incoming.Message.Text, "/tide"):
 		incoming.Respond(TODAY_TIDE)
-	case strings.Contains(incoming.Message.Text, "/weather"):
-		incoming.Respond("Weather is no longer a ice-breaking topic, try harder")
 	case strings.Contains(incoming.Message.Text, "/joke"):
 		results, err := incoming.GetJoke()
 		if err != nil {
@@ -52,6 +50,12 @@ func HandleTelegramWebhook(w http.ResponseWriter, r *http.Request) {
 		results, err := incoming.Search()
 		if err != nil {
 			incoming.Respond("Some Ting Wong")
+		}
+		incoming.Respond(results)
+	case strings.Contains(incoming.Message.Text, "/weather"):
+		results, err := incoming.GetWeather()
+		if err != nil {
+			incoming.Respond("Can't get weather info")
 		}
 		incoming.Respond(results)
 	default:
