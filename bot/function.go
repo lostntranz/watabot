@@ -58,6 +58,12 @@ func HandleTelegramWebhook(w http.ResponseWriter, r *http.Request) {
 			incoming.Respond("Can't get weather info")
 		}
 		incoming.Respond(results)
+	case strings.Contains(incoming.Message.Text, "/aqi"):
+		results, err := incoming.GetAQI()
+		if err != nil {
+			incoming.Respond("Can't get AQI info")
+		}
+		incoming.Respond(results)
 	default:
 		incoming.Respond("嘥撚氣,，算吧啦!")
 	}
