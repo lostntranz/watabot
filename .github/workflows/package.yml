@@ -9,15 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      - name: "create tmp dir"
-        run: |
-          mkdir function
-          cp go.mod function
-          cp bot/*go function
-
-      - name: "upload function.zip"
-      - uses: actions/upload-artifact@v3
+      - name: "create function.zip"
+        uses: actions/upload-artifact@v3
         with:
           name: function.zip
-          path: ./function
+          path: |
+            go.mod
+            bot/*.go
